@@ -19,4 +19,4 @@ receivers:
       smarthost: smtp.gmail.com:587
       auth_username: 'alamwaqas@gmail.com'
       auth_identity: 'alamwaqas@gmail.com'
-      auth_password: 'lqccvxajbwljbdpx'
+      auth_password: ''
