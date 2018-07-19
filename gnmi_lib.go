@@ -126,7 +126,7 @@ func setval(val *gnmipb.TypedValue) string {
 	default:
 		panic(v)
 	}
-	return "shit!"
+	return ""
 }
 
 func kebabCaseToCamelCase(kebab string) (camelCase string) {
@@ -146,7 +146,6 @@ func kebabCaseToCamelCase(kebab string) (camelCase string) {
 	return
 }
 func (gi *gnmiInfo) handleUpdate(n *gnmipb.Notification) {
-	//	t := time.Unix(0, n.Timestamp).UTC()
 	gi.decodePath(n.Prefix)
 	count := 0
 	for _, update := range n.Update {
