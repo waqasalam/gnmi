@@ -1,0 +1,22 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'email-me'
+receivers:
+- name: 'web.hook'
+  webhook_configs:
+  - url: 'http://127.0.0.1:5001/'
+
+- name: 'email-me'
+  email_configs:
+    - to: 'walam@linkedin.com'
+      from: 'alamwaqas@gmail.com'
+      smarthost: smtp.gmail.com:587
+      auth_username: 'alamwaqas@gmail.com'
+      auth_identity: 'alamwaqas@gmail.com'
+      auth_password: 'lqccvxajbwljbdpx'

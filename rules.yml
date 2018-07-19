@@ -1,0 +1,11 @@
+groups:
+- name: example
+  rules:
+  - alert: InterfaceDown
+    expr: >
+      rate(in_unicast_packets_total{interface="Ethernet2"}[1m]) == 0
+    for: 1m
+    labels:
+      severity: ticket
+    annotations:
+      summary: 'interface is down.'
