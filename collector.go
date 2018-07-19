@@ -5,15 +5,14 @@ import (
 )
 
 type gnmiCollector struct {
-	fooMetric *prometheus.Desc
+	up   *prometheus.Desc
+	ifdb *intfDB
 }
 
-func newGNMICollector() *gnmiCollector {
+func newGNMICollector(ifdb *intfDB) *gnmiCollector {
 	return &gnmiCollector{
-		fooMetric: prometheus.NewDesc("foo_metric",
-			"Shows whether a foo has occurred in our cluster",
-			nil, nil,
-		),
+		up:   prometheus.NewDesc("arista_ceos_up", "Arista cEOS1 is up", nil, nil),
+		ifdb: ifdb,
 	}
 }
 
@@ -22,19 +21,30 @@ func newGNMICollector() *gnmiCollector {
 func (collector *gnmiCollector) Describe(ch chan<- *prometheus.Desc) {
 
 	//Update this section with the each metric you create for a given collector
-	ch <- collector.fooMetric
+	ch <- collector.up
 }
 
 //Collect implements required collect function.
 func (collector *gnmiCollector) Collect(ch chan<- prometheus.Metric) {
+	ch <- prometheus.MustNewConstMetric(collector.up, prometheus.GaugeValue, 1)
+	for intfname, intf := range collector.ifdb.db {
+		desc := prometheus.NewDesc("in_broadcast_packets_total", "Broadcast packets recieved", []string{"interface"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InBroadcastPkts), intfname, "cEOS1")
+		desc = prometheus.NewDesc("in_discard_packets_total", "Discard packets recieved", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InDiscards), intfname, "cEOS1")
+		desc = prometheus.NewDesc("in_error_packets_total", "Error packets recieved", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InErrors), intfname, "cEOS1")
+		desc = prometheus.NewDesc("in_multicast_packets_total", "Multicast packets recieved", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InMulticastPkts), intfname, "cEOS1")
+		desc = prometheus.NewDesc("in_bytes_total", "Total bytes recieved", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InOctets), intfname, "cEOS1")
+		desc = prometheus.NewDesc("in_unicast_packets_total", "Total unicast recieved", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InUnicastPkts), intfname, "cEOS1")
+		desc = prometheus.NewDesc("out_discard_packets_total", "Total discard packets sent", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.InBroadcastPkts), intfname, "cEOS1")
+		desc = prometheus.NewDesc("out_unicast_packets_total", "Total unicast packets sent", []string{"interface", "switch"}, nil)
+		ch <- prometheus.MustNewConstMetric(desc, prometheus.CounterValue, float64(intf.stats.OutUnicastPkts), intfname, "cEOS1")
 
-	var metricValue float64
-	if 1 == 1 {
-		metricValue = 1
 	}
-
-	//Write latest value for each metric in the prometheus metric channel.
-	//Note that you can pass CounterValue, GaugeValue, or UntypedValue types here.
-	ch <- prometheus.MustNewConstMetric(collector.fooMetric, prometheus.CounterValue, metricValue)
 
 }

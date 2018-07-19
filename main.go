@@ -34,36 +34,42 @@ func usageAndExit(s string) {
 
 func main() {
 	cfg := &gnmi.Config{}
-	flag.StringVar(&cfg.Addr, "addr", "", "Address of gNMI gRPC server with optional VRF name")
-	flag.StringVar(&cfg.CAFile, "cafile", "", "Path to server TLS certificate file")
-	flag.StringVar(&cfg.CertFile, "certfile", "", "Path to client TLS certificate file")
-	flag.StringVar(&cfg.KeyFile, "keyfile", "", "Path to client TLS private key file")
-	flag.StringVar(&cfg.Password, "password", "", "Password to authenticate with")
-	flag.StringVar(&cfg.Username, "username", "", "Username to authenticate with")
-	flag.BoolVar(&cfg.TLS, "tls", false, "Enable TLS")
+	/*
+				flag.StringVar(&cfg.Addr, "addr", "", "Address of gNMI gRPC server with optional VRF name")
+				flag.StringVar(&cfg.CAFile, "cafile", "", "Path to server TLS certificate file")
+				flag.StringVar(&cfg.CertFile, "certfile", "", "Path to client TLS certificate file")
+				flag.StringVar(&cfg.KeyFile, "keyfile", "", "Path to client TLS private key file")
+				flag.StringVar(&cfg.Password, "password", "", "Password to authenticate with")
+				flag.StringVar(&cfg.Username, "username", "", "Username to authenticate with")
+				flag.BoolVar(&cfg.TLS, "tls", false, "Enable TLS")
 
-	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, help)
-		flag.PrintDefaults()
-	}
-	flag.Parse()
-	if cfg.Addr == "" {
-		usageAndExit("error: address not specified")
-	}
+			flag.Usage = func() {
+				fmt.Fprintln(os.Stderr, help)
+				flag.PrintDefaults()
+			}
+			flag.Parse()
 
-	args := flag.Args()
+		if cfg.Addr == "" {
+			usageAndExit("error: address not specified")
+		}
 
-	gi, err := newGNMIInfo(cfg)
+			args := flag.Args()
+	*/
+	cfg.Addr = "172.19.0.2:6030"
+	cfg.Username = "admin"
+	cfg.Password = "abc"
+	ni := newIntfDB()
+	gi, err := newGNMIInfo(cfg, ni)
 	if err != nil {
 		glog.Fatal(err)
 	}
-
+	foo := newGNMICollector(ni)
 	go func() {
-		foo := newGNMICollector()
+
 		prometheus.MustRegister(foo)
 		http.Handle("/metrics", promhttp.Handler())
-		glog.Info("Begining to serve on port :8082")
-		glog.Fatal(http.ListenAndServe(":8082", nil))
+		glog.Info("Begining to serve on port :8080")
+		glog.Fatal(http.ListenAndServe(":8090", nil))
 	}()
 
 	for i := 0; i < len(args); i++ {
